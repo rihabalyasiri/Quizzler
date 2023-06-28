@@ -2,8 +2,8 @@ import 'package:quizzler/question.dart';
 
 class QuestionBrain {
 
-  int questionNumber = 0;
-  List<Question> questionBank = [
+  int _questionNumber = 0;
+  final List<Question> _questionBank = [
     Question('Some cats are actually allergic to humans', true),
     Question('You can lead a cow down stairs but not up stairs.', false),
     Question('Approximately one quarter of human bones are in the feet.', true),
@@ -31,17 +31,23 @@ class QuestionBrain {
         true),
   ];
 
-  void nextQuestion() {
-    if(questionNumber < questionBank.length - 1) {
-      questionNumber++;
+  bool nextQuestion() {
+    if(_questionNumber < _questionBank.length - 1) {
+      _questionNumber++;
+      return true;
     }
+    return false;
+  }
+
+  void restart() {
+    _questionNumber = 0;
   }
 
   String getQuestionText() {
-    return questionBank[questionNumber].questionText;
+    return _questionBank[_questionNumber].questionText;
   }
 
   bool getQuestionAnswer() {
-    return questionBank[questionNumber].questionAnswer;
+    return _questionBank[_questionNumber].questionAnswer;
   }
 }

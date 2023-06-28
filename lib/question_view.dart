@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:quizzler/question_brain.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 class QuestionView extends StatefulWidget {
   const QuestionView({super.key});
@@ -8,18 +10,46 @@ class QuestionView extends StatefulWidget {
 }
 
 class _QuestionViewState extends State<QuestionView> {
+  QuestionBrain questionBrain = QuestionBrain();
+  List<Icon> scoreKeeper = [];
+
+  void restartQuizzler() {
+    setState(() {
+      questionBrain.restart();
+      scoreKeeper = [];
+      Navigator.pop(context);
+    });
+  }
+
+  void checkAnswer({required bool userAnswer, required bool questionAnswer}) {
+    setState(() {
+      if (userAnswer == questionAnswer) {
+        scoreKeeper.add(const Icon(
+          Icons.check,
+          color: Colors.green,
+        ));
+      } else {
+        scoreKeeper.add(const Icon(
+          Icons.close,
+          color: Colors.red,
+        ));
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Expanded(
+          Expanded(
             flex: 4,
             child: Center(
               child: Text(
-                "hier is the Question",
-                style: TextStyle(fontSize: 20),
+                questionBrain.getQuestionText(),
+                style: const TextStyle(fontSize: 20, color: Colors.white),
+                textAlign: TextAlign.center,
               ),
             ),
           ),
@@ -35,7 +65,33 @@ class _QuestionViewState extends State<QuestionView> {
                   style: TextButton.styleFrom(
                     backgroundColor: Colors.green,
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    bool questionAnswer = questionBrain.getQuestionAnswer();
+                    checkAnswer(
+                        userAnswer: true, questionAnswer: questionAnswer);
+                    bool isNextQuestion = questionBrain.nextQuestion();
+                    if (!isNextQuestion) {
+                      Alert(
+                        context: context,
+                        type: AlertType.warning,
+                        title: "Questions are finished",
+                        desc: "Try Again!",
+                        buttons: [
+                          DialogButton(
+                            onPressed: () {
+                              restartQuizzler();
+                            },
+                            width: 120,
+                            child: const Text(
+                              "Start",
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 20),
+                            ),
+                          )
+                        ],
+                      ).show();
+                    }
+                  },
                   child: const Text(
                     "True",
                     style: TextStyle(color: Colors.white),
@@ -45,18 +101,40 @@ class _QuestionViewState extends State<QuestionView> {
                   style: TextButton.styleFrom(
                     backgroundColor: Colors.red,
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    bool questionAnswer = questionBrain.getQuestionAnswer();
+                    checkAnswer(
+                        userAnswer: false, questionAnswer: questionAnswer);
+                    bool isNextQuestion = questionBrain.nextQuestion();
+                    if (!isNextQuestion) {
+                      Alert(
+                        context: context,
+                        type: AlertType.warning,
+                        title: "Questions are finished",
+                        desc: "Try Again!",
+                        buttons: [
+                          DialogButton(
+                            onPressed: () {
+                              restartQuizzler();
+                            },
+                            width: 120,
+                            child: const Text(
+                              "Start",
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 20),
+                            ),
+                          )
+                        ],
+                      ).show();
+                    }
+                  },
                   child: const Text("False",
                       style: TextStyle(color: Colors.white)),
                 ),
               ],
             ),
           ),
-          const Row(
-            children: [
-              Icon(Icons.check),
-            ],
-          )
+          Row(children: scoreKeeper)
         ],
       ),
     );
